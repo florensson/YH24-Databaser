@@ -11,7 +11,7 @@ CREATE TABLE Kunder (
     KundID INT AUTO_INCREMENT PRIMARY KEY,
     Namn VARCHAR(100) NOT NULL,
     Email VARCHAR(255) UNIQUE NOT NULL,
-    Registreringsdatum DATE DEFAULT CURRENT_DATE
+    Registreringsdatum TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Skapa Produkter-tabellen
@@ -26,7 +26,7 @@ CREATE TABLE Produkter (
 CREATE TABLE Beställningar (
     OrderID INT AUTO_INCREMENT PRIMARY KEY,
     KundID INT NOT NULL,
-    Datum DATE DEFAULT CURRENT_DATE,
+    Datum TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (KundID) REFERENCES Kunder(KundID)
 );
 
@@ -44,18 +44,6 @@ CREATE TABLE Orderrader (
 
 -- Lektion 2
 
--- Hämtar data
-SELECT * FROM Kunder;
-SELECT Namn, Email FROM Kunder;
-
--- Where filterar data
-SELECT * FROM Kunder WHERE Namn = 'Anna';
-SELECT * FROM Produkter WHERE Pris > 500; -- Priset är över 500kr
-
--- Order by, sortera datan
-SELECT * FROM Produkter ORDER BY Pris ASC;
-SELECT * FROM Kunder ORDER BY Registreringsdatum DESC;
-
 -- Infoga data
 INSERT INTO Kunder (Namn, Email) VALUES
 ('Anna Andersson', 'anna@email.com'),
@@ -65,6 +53,27 @@ INSERT INTO Produkter (Namn, Pris, Kategori) VALUES
 ('T-shirt', 199.99, 'Kläder'),
 ('Jeans', 499.99, 'Kläder'),
 ('Sneakers', 899.99, 'Skor');
+
+-- Hämtar data
+SELECT * FROM Kunder;
+SELECT Namn, Email FROM Kunder;
+
+-- Where filterar data
+SELECT * FROM Kunder WHERE Namn = 'Anna Andersson';
+SELECT * FROM Produkter WHERE Pris > 500; -- Priset är över 500kr
+
+-- Order by, sortera datan
+SELECT * FROM Produkter ORDER BY Pris ASC;
+SELECT * FROM Kunder ORDER BY Registreringsdatum DESC;
+
+/*
+Om det bråkar med delete och update så kan vi använda: 
+SET SQL_SAFE_UPDATES = 0;
+
+Om du inte gillar det och de risker som finns kan du 
+UPDATE Kunder SET Email = 'anna.new@email.com' WHERE KundID = 1;
+där vi använder PK för att lösa det.
+*/
 
 -- uppdatera data
 UPDATE Kunder SET Email = 'anna.new@email.com' WHERE Namn = 'Anna Andersson';
