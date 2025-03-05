@@ -1,0 +1,154 @@
+/*
+Skapa butiken först, detta är draft 1 och kan behöva förbättras.
+Men i SQL så innefattar detta alla vi ska göra.
+*/
+
+CREATE DATABASE Klädbutik;
+USE Klädbutik;
+
+-- Skapa Kunder-tabellen
+CREATE TABLE Kunder (
+    KundID INT AUTO_INCREMENT PRIMARY KEY,
+    Namn VARCHAR(100) NOT NULL,
+    Email VARCHAR(255) UNIQUE NOT NULL,
+    Registreringsdatum DATE DEFAULT CURRENT_DATE
+);
+
+-- Skapa Produkter-tabellen
+CREATE TABLE Produkter (
+    ProduktID INT AUTO_INCREMENT PRIMARY KEY,
+    Namn VARCHAR(100) NOT NULL,
+    Pris DECIMAL(10,2) NOT NULL CHECK (Pris > 0),
+    Kategori VARCHAR(50) NOT NULL
+);
+
+-- Skapa Beställningar-tabellen
+CREATE TABLE Beställningar (
+    OrderID INT AUTO_INCREMENT PRIMARY KEY,
+    KundID INT NOT NULL,
+    Datum DATE DEFAULT CURRENT_DATE,
+    FOREIGN KEY (KundID) REFERENCES Kunder(KundID)
+);
+
+-- Skapa Orderrader-tabellen
+CREATE TABLE Orderrader (
+    OrderradID INT AUTO_INCREMENT PRIMARY KEY,
+    OrderID INT NOT NULL,
+    ProduktID INT NOT NULL,
+    Antal INT NOT NULL CHECK (Antal > 0),
+    Pris DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (OrderID) REFERENCES Beställningar(OrderID),
+    FOREIGN KEY (ProduktID) REFERENCES Produkter(ProduktID)
+);
+
+
+-- Lektion 2
+
+-- Hämtar data
+SELECT * FROM Kunder;
+SELECT Namn, Email FROM Kunder;
+
+-- Where filterar data
+SELECT * FROM Kunder WHERE Namn = 'Anna';
+SELECT * FROM Produkter WHERE Pris > 500; -- Priset är över 500kr
+
+-- Order by, sortera datan
+SELECT * FROM Produkter ORDER BY Pris ASC;
+SELECT * FROM Kunder ORDER BY Registreringsdatum DESC;
+
+-- Infoga data
+INSERT INTO Kunder (Namn, Email) VALUES
+('Anna Andersson', 'anna@email.com'),
+('Erik Svensson', 'erik@email.com');
+
+INSERT INTO Produkter (Namn, Pris, Kategori) VALUES
+('T-shirt', 199.99, 'Kläder'),
+('Jeans', 499.99, 'Kläder'),
+('Sneakers', 899.99, 'Skor');
+
+-- uppdatera data
+UPDATE Kunder SET Email = 'anna.new@email.com' WHERE Namn = 'Anna Andersson';
+
+-- ta bort data
+DELETE FROM Kunder WHERE Namn = 'Erik Svensson';
+
+
+-- Lektion 3
+-- INNER JOIN
+SELECT Kunder.Namn, Beställningar.OrderID
+FROM Kunder
+INNER JOIN Beställningar ON Kunder.KundID = Beställningar.KundID;
+
+-- LEFT JOIN
+SELECT Kunder.Namn, Beställningar.OrderID
+FROM Kunder
+LEFT JOIN Beställningar ON Kunder.KundID = Beställningar.KundID;
+
+-- GROUP BY, räknar antal beställningar per kund
+SELECT KundID, COUNT(OrderID) AS AntalBeställningar
+FROM Beställningar
+GROUP BY KundID;
+
+-- HAVING, visar bara kunder med mer än 2 beställningar
+SELECT KundID, COUNT(OrderID) AS AntalBeställningar
+FROM Beställningar
+GROUP BY KundID
+HAVING COUNT(OrderID) > 2; -- Villkoret att det ska vara mer än 2
+
+-- Lektion 4: INDEX, TRIGGERS & CONSTRAINTS
+-- INDEX – Skapa index på e-post i Kunder-tabellen
+CREATE INDEX idx_email ON Kunder(Email);
+
+-- CONSTRAINTS – Säkerställa att pris alltid är större än 0, se om du kan hitta vilken rad det är
+
+-- TRIGGER – Uppdatera lagersaldo efter en order
+DELIMITER $$
+
+CREATE TRIGGER uppdatera_lager
+AFTER INSERT ON Orderrader
+FOR EACH ROW
+BEGIN
+    UPDATE Produkter 
+    SET Lagerstatus = Lagerstatus - NEW.Antal
+    WHERE ProduktID = NEW.ProduktID;
+END $$
+
+DELIMITER ;
+
+-- TRIGGER – Logga nya kunder i en logg-tabell
+CREATE TABLE Kundlogg (
+    LoggID INT AUTO_INCREMENT PRIMARY KEY,
+    KundID INT,
+    Registreringsdatum TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (KundID) REFERENCES Kunder(KundID)
+);
+
+DELIMITER $$
+
+CREATE TRIGGER logga_ny_kund
+AFTER INSERT ON Kunder
+FOR EACH ROW
+BEGIN
+    INSERT INTO Kundlogg (KundID)
+    VALUES (NEW.KundID);
+END $$
+
+DELIMITER ;
+
+-- Lektion 5: JSON, NoSQL, Backup & Restore
+
+-- Lagra JSON i MySQL
+CREATE TABLE Produktinfo (
+    ProduktID INT PRIMARY KEY,
+    Info JSON NOT NULL
+);
+
+INSERT INTO Produktinfo (ProduktID, Info) VALUES
+(1, '{ "namn": "T-shirt", "färg": "svart", "storlek": "M" }'),
+(2, '{ "namn": "Jeans", "färg": "blå", "storlek": "L" }');
+
+-- Backup av databasen, TERMINAL!
+mysqldump -u root -p Klädbutik > kladbutik_backup.sql
+
+-- Återställ databasen från backup
+mysql -u root -p Klädbutik < kladbutik_backup.sql
