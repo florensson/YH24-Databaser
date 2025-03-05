@@ -81,6 +81,20 @@ UPDATE Kunder SET Email = 'anna.new@email.com' WHERE Namn = 'Anna Andersson';
 -- ta bort data
 DELETE FROM Kunder WHERE Namn = 'Erik Svensson';
 
+/*
+Ett ännu bättre sätt är att:
+*/
+START TRANSACTION;  -- Börjar en transaktion
+
+UPDATE Kunder 
+SET Email = 'anna.ny@email.com' 
+WHERE KundID = 1;
+
+SELECT * FROM Kunder WHERE KundID = 1;  -- Kolla om ändringen ser rätt ut
+
+COMMIT;  -- Spara ändringen permanent
+
+ROLLBACK;  -- Ångra ändringen
 
 -- Lektion 3
 -- INNER JOIN
