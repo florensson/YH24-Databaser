@@ -121,38 +121,56 @@ INSERT INTO Orderrader (OrderID, ProduktID, Antal, Pris) VALUES
 (6, 1, 3, 199.99);  -- Kund 3 köper 3 T-shirts
 
 
--- INNER JOIN
+-- inner join
 SELECT Kunder.Namn, Beställningar.OrderID
 FROM Kunder
 INNER JOIN Beställningar ON Kunder.KundID = Beställningar.KundID;
 
--- LEFT JOIN
+-- Left join
 SELECT Kunder.Namn, Beställningar.OrderID
 FROM Kunder
 LEFT JOIN Beställningar ON Kunder.KundID = Beställningar.KundID;
 
--- GROUP BY, räknar antal beställningar per kund
+-- Group by, räknar antal beställningar per kund
 SELECT KundID, COUNT(OrderID) AS AntalBeställningar
 FROM Beställningar
 GROUP BY KundID;
 
--- GROUP BY, räknar antal beställningar per kund. Men här kan vi se kundens namn med en inner join
+-- Group by, räknar antal beställningar med kundens namn
 SELECT Kunder.namn, COUNT(OrderID) AS AntalBeställningar
 FROM Beställningar
 INNER JOIN Kunder ON Beställningar.KundID = Kunder.KundID
 GROUP BY Kunder.Namn;
 
--- HAVING, visar bara kunder med mer än 2 beställningar
-SELECT KundID, COUNT(OrderID) AS AntalBeställningar
+SELECT Kunder.namn, COUNT(OrderID) AS AntalBeställningar
 FROM Beställningar
-GROUP BY KundID
-HAVING COUNT(OrderID) > 2; -- Villkoret att det ska vara mer än 2
+INNER JOIN Kunder ON Beställningar.KundID = Kunder.KundID
+GROUP BY Kunder.Namn
+HAVING COUNT(OrderID) > 2; -- Ska vara mer än 2
+
+
+
+
+
 
 -- Lektion 4: INDEX, TRIGGERS & CONSTRAINTS
 -- INDEX – Skapa index på e-post i Kunder-tabellen
 CREATE INDEX idx_email ON Kunder(Email);
 
+-- För att se vårt index
+SHOW INDEX FROM Kunder;
+
 -- CONSTRAINTS – Säkerställa att pris alltid är större än 0, se om du kan hitta vilken rad det är
+
+ALTER TABLE Produkter 
+ADD CONSTRAINT check_pris CHECK (Pris > 0);
+
+-- testa med en produkt som har pris 0
+INSERT INTO Produkter (Namn, Pris, Kategori) 
+VALUES ('Gratisprodukt', 0, 'Kläder');
+
+-- Lägg till så vi får lagerstatur på våra produkter
+ALTER TABLE Produkter ADD COLUMN Lagerstatus INT DEFAULT 10;
 
 -- TRIGGER – Uppdatera lagersaldo efter en order
 DELIMITER $$
@@ -167,6 +185,11 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+INSERT INTO Orderrader (OrderID, ProduktID, Antal, Pris) 
+VALUES (1, 1, 2, 199.99);  -- Beställer 2 T-shirts
+
+SELECT * FROM Produkter WHERE ProduktID = 1;
 
 -- TRIGGER – Logga nya kunder i en logg-tabell
 CREATE TABLE Kundlogg (
@@ -187,6 +210,11 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+-- Testa om det fungerar med en ny kund
+INSERT INTO Kunder (Namn, Email) VALUES ('Maria Karlsson', 'maria@email.com');
+SELECT * FROM Kundlogg;
+
 
 -- Lektion 5: JSON, NoSQL, Backup & Restore
 
