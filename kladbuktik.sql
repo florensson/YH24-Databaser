@@ -48,6 +48,7 @@ CREATE TABLE Orderrader (
 INSERT INTO Kunder (Namn, Email) VALUES
 ('Anna Andersson', 'anna@email.com'),
 ('Erik Svensson', 'erik@email.com');
+('Lisa Berg', 'lisa@email.com');
 
 INSERT INTO Produkter (Namn, Pris, Kategori) VALUES
 ('T-shirt', 199.99, 'Kläder'),
@@ -97,6 +98,29 @@ COMMIT;  -- Spara ändringen permanent
 ROLLBACK;  -- Ångra ändringen
 
 -- Lektion 3
+
+/*
+Lägger till lite mer för att det ska bli något mer att kolla på sitället för null
+*/
+INSERT INTO Beställningar (KundID, Datum) VALUES
+(1, '2024-03-01'),
+(1, '2024-03-10'),
+(2, '2024-03-05'),
+(3, '2024-03-07'),
+(3, '2024-03-10'),
+(3, '2024-03-12');
+
+
+INSERT INTO Orderrader (OrderID, ProduktID, Antal, Pris) VALUES
+(1, 1, 2, 199.99),  -- Kund 1 köper 2 T-shirts
+(1, 3, 1, 899.99),  -- Kund 1 köper 1 par Sneakers
+(2, 2, 1, 499.99),  -- Kund 1 köper 1 par Jeans
+(3, 1, 1, 199.99),  -- Kund 2 köper 1 T-shirt
+(4, 2, 1, 499.99),  -- Kund 3 köper 1 par Jeans
+(5, 3, 1, 899.99),  -- Kund 3 köper 1 par Sneakers
+(6, 1, 3, 199.99);  -- Kund 3 köper 3 T-shirts
+
+
 -- INNER JOIN
 SELECT Kunder.Namn, Beställningar.OrderID
 FROM Kunder
