@@ -136,6 +136,12 @@ SELECT KundID, COUNT(OrderID) AS AntalBeställningar
 FROM Beställningar
 GROUP BY KundID;
 
+-- GROUP BY, räknar antal beställningar per kund. Men här kan vi se kundens namn med en inner join
+SELECT Kunder.namn, COUNT(OrderID) AS AntalBeställningar
+FROM Beställningar
+INNER JOIN Kunder ON Beställningar.KundID = Kunder.KundID
+GROUP BY Kunder.Namn;
+
 -- HAVING, visar bara kunder med mer än 2 beställningar
 SELECT KundID, COUNT(OrderID) AS AntalBeställningar
 FROM Beställningar
